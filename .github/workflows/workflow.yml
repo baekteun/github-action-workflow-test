@@ -2,6 +2,8 @@ name: Auto close issue when PR is merged
 
 on:
   pull_request_target:
+    branches:
+      - "!develop"
     types: [closed]
 
 jobs:
