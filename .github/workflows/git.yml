@@ -14,6 +14,9 @@ jobs:
         run: |
           git pull
           git branch -D feature/test-git
+
+      - name: Test Git 2
+        run: |
           git switch feature/test-git
 
           echo "success to git test"
