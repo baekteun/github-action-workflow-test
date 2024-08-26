@@ -1,0 +1,18 @@
+name: git test
+
+on: workflow_dispatch
+
+jobs:
+  test_git:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Test Git
+        run: |
+          git pull
+          git branch -D feature/test-git
+          git switch feature/test-git
+
+          echo "success to git test"
