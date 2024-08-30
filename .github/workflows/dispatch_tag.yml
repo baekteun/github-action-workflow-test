@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.MY_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
