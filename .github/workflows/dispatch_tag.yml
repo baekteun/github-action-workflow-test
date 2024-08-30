@@ -23,6 +23,7 @@ jobs:
 
       - name: Switch branch
         run: |
+          git pull
           git switch ${{ env.BRANCH }}
 
       - name: Add tag
