@@ -1,0 +1,34 @@
+name: add tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "branch"
+        required: true
+      tag:
+        description: "tag"
+        required: true
+
+env:
+  BRANCH: ${{ github.event.inputs.branch }}
+  TAG: ${{ github.event.inputs.tag }}
+
+jobs:
+  test_git:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Switch branch
+        run: |
+          git switch ${{ env.BRNACH }}
+
+      - name: Add tag
+        run: |
+          git config --global user.name "baekteun"
+          git config --global user.email "baegteun@gmail.com"
+          TAG_NAME="${{ env.TAG }}"
+          git tag -a "$TAG_NAME"
+          git push origin "$TAG_NAME"
