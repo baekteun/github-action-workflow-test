@@ -16,6 +16,8 @@ env:
 
 jobs:
   test_git:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.MY_TOKEN }}
