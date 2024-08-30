@@ -31,5 +31,5 @@ jobs:
           git config --global user.name "baekteun"
           git config --global user.email "baegteun@gmail.com"
           TAG_NAME="${{ env.TAG }}"
-          git tag -a "$TAG_NAME"
+          git tag -a "$TAG_NAME" -m ""
           git push origin "$TAG_NAME"
