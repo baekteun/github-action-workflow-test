@@ -35,7 +35,14 @@ jobs:
         run: |
           git config --global user.name "baekteun"
           git config --global user.email "baegteun@gmail.com"
-          TAG_NAME="${{ env.TAG }}"
-          git tag -a "$TAG_NAME" -m ""
-          git push https://baekteun:${{ env.GH_TOKEN }}@github.com/github-action-workflow-test.git
-          git push origin "$TAG_NAME"
+
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.35.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
+          CUSTOM_TAG: ${{ env.TAG }}
+
+          # TAG_NAME="${{ env.TAG }}"
+          # git tag -a "$TAG_NAME" -m ""
+          # git push https://baekteun:${{ env.GH_TOKEN }}@github.com/github-action-workflow-test.git
+          # git push origin "$TAG_NAME"
