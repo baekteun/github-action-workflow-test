@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import * as core from "@actions/core";
-import * as parseDiff from "parse-diff";
+var parseDiff = require("parse-diff");
 import { Octokit } from "@octokit/rest";
 import { minimatch } from "minimatch";
 import ollama from "ollama";
