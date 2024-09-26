@@ -88,6 +88,7 @@ ${chunk.changes.map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`).join("\n")}
 
 async function getAIResponse(prompt) {
   try {
+    await ollama.pull({ model: OLLAMA_MODEL });
     const response = await ollama.generate({
       model: OLLAMA_MODEL,
       prompt: prompt,
