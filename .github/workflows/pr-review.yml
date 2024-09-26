@@ -1,0 +1,41 @@
+name: Ollama PR Review (Self-hosted)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: baekteun
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          npm install @actions/core @octokit/rest parse-diff minimatch ollama
+
+      - name: Ensure Ollama is running
+        run: |
+          if ! pgrep -x "ollama" > /dev/null
+          then
+              echo "Starting Ollama server"
+              ollama serve &
+              sleep 10  # Wait for Ollama to start
+          else
+              echo "Ollama is already running"
+          fi
+
+      - name: Run PR review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OLLAMA_MODEL: llama3.1  # Adjust this to your preferred model
+        run: |
+          node pr-review-script.js
+        continue-on-error: true
+
+      # Don't stop Ollama server as it might be used by other processes
