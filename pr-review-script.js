@@ -176,7 +176,7 @@ async function main() {
     );
   });
 
-  const comments = await analyzeCode(filteredDiff, prDetails);
+  const comments = await analyzeCode(parsedDiff, prDetails);
   if (comments.length > 0) {
     await createReviewComment(
       prDetails.owner,
