@@ -6,14 +6,14 @@ on:
 
 jobs:
   review:
-    runs-on: baekteun
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Install dependencies
         run: |
@@ -33,7 +33,7 @@ jobs:
       - name: Run PR review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OLLAMA_MODEL: llama3.1  # Adjust this to your preferred model
+          OLLAMA_MODEL: llama3.1 # Adjust this to your preferred model
         run: |
           node pr-review-script.js
         continue-on-error: true
