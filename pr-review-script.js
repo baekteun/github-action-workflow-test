@@ -5,7 +5,7 @@ import { Octokit } from "@octokit/rest";
 import { minimatch } from "minimatch";
 import ollama from "ollama";
 
-const GITHUB_TOKEN = core.getInput("GITHUB_TOKEN");
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OLLAMA_MODEL = "llama3.1";
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
