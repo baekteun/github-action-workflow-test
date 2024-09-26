@@ -6,7 +6,7 @@ import { minimatch } from "minimatch";
 import ollama from "ollama";
 
 const GITHUB_TOKEN = core.getInput("GITHUB_TOKEN");
-const OLLAMA_MODEL = core.getInput("OLLAMA_MODEL");
+const OLLAMA_MODEL = "llama3.1";
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
