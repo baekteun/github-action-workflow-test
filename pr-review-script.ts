@@ -1,51 +1,81 @@
-import { readFileSync as r } from "fs";
-import * as c from "@actions/core";
-import { Octokit as O } from "@octokit/rest";
-import p, { Chunk as C, File as F } from "parse-diff";
-import m from "minimatch";
-import { Client as L } from "ollama";
+import { readFileSync } from "fs";
+import * as core from "@actions/core";
+import { Octokit } from "@octokit/rest";
+import parseDiff, { Chunk, File } from "parse-diff";
+import minimatch from "minimatch";
+import { Client } from "ollama";
 
-const T = c.getInput("GITHUB_TOKEN"),
-  M = c.getInput("OLLAMA_MODEL");
+const GITHUB_TOKEN: string = core.getInput("GITHUB_TOKEN");
+const OLLAMA_MODEL: string = core.getInput("OLLAMA_MODEL");
 
-const o = new O({ auth: T }),
-  l = new L();
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
+const ollama = new Client();
 
-async function _() {
-  const { repository: e, number: n } = JSON.parse(
-    r(process.env.GITHUB_EVENT_PATH || "", "utf8")
+interface PRDetails {
+  owner: string;
+  repo: string;
+  pull_number: number;
+  title: string;
+  description: string;
+}
+
+async function getPRDetails(): Promise<PRDetails> {
+  const { repository, number } = JSON.parse(
+    readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf8")
   );
-  const t = await o.pulls.get({
-    owner: e.owner.login,
-    repo: e.name,
-    pull_number: n,
+  const prResponse = await octokit.pulls.get({
+    owner: repository.owner.login,
+    repo: repository.name,
+    pull_number: number,
   });
   return {
-    o: e.owner.login,
-    r: e.name,
-    p: n,
-    t: t.data.title ?? "",
-    d: t.data.body ?? "",
+    owner: repository.owner.login,
+    repo: repository.name,
+    pull_number: number,
+    title: prResponse.data.title ?? "",
+    description: prResponse.data.body ?? "",
   };
 }
 
-async function $(e, n, t) {
-  return (
-    await o.pulls.get({
-      owner: e,
-      repo: n,
-      pull_number: t,
-      mediaType: { format: "diff" },
-    })
-  ).data;
+async function getDiff(
+  owner: string,
+  repo: string,
+  pull_number: number
+): Promise<string | null> {
+  const response = await octokit.pulls.get({
+    owner,
+    repo,
+    pull_number,
+    mediaType: { format: "diff" },
+  });
+  // @ts-expect-error - response.data is a string
+  return response.data;
 }
 
-async function A(e, n) {
-  const t = [];
-  for (const a of e)
-    if (a.to !== "/dev/null")
-      for (const i of a.chunks) {
-        const s = `Your task is to review pull requests. Instructions:
+async function analyzeCode(
+  parsedDiff: File[],
+  prDetails: PRDetails
+): Promise<Array<{ body: string; path: string; line: number }>> {
+  const comments: Array<{ body: string; path: string; line: number }> = [];
+
+  for (const file of parsedDiff) {
+    if (file.to === "/dev/null") continue; // Ignore deleted files
+    for (const chunk of file.chunks) {
+      const prompt = createPrompt(file, chunk, prDetails);
+      const aiResponse = await getAIResponse(prompt);
+      if (aiResponse) {
+        const newComments = createComment(file, chunk, aiResponse);
+        if (newComments) {
+          comments.push(...newComments);
+        }
+      }
+    }
+  }
+  return comments;
+}
+
+function createPrompt(file: File, chunk: Chunk, prDetails: PRDetails): string {
+  return `Your task is to review pull requests. Instructions:
 - Provide the response in following JSON format:  {"reviews": [{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}]}
 - Do not give positive comments or compliments.
 - Provide comments and suggestions ONLY if there is something to improve, otherwise "reviews" should be an empty array.
@@ -54,88 +84,144 @@ async function A(e, n) {
 - IMPORTANT: NEVER suggest adding comments to the code.
 
 Review the following code diff in the file "${
-          a.to
-        }" and take the pull request title and description into account when writing the response.
+    file.to
+  }" and take the pull request title and description into account when writing the response.
   
-Pull request title: ${n.t}
+Pull request title: ${prDetails.title}
 Pull request description:
 
 ---
-${n.d}
+${prDetails.description}
 ---
 
 Git diff to review:
 
 \`\`\`diff
-${i.content}
-${i.changes.map((u) => `${u.ln ? u.ln : u.ln2} ${u.content}`).join("\n")}
+${chunk.content}
+${chunk.changes
+  // @ts-expect-error - ln and ln2 exists where needed
+  .map((c) => `${c.ln ? c.ln : c.ln2} ${c.content}`)
+  .join("\n")}
 \`\`\`
 `;
-        const f = await (async (u) => {
-          try {
-            const h = await l.generate({ model: M, prompt: u });
-            return JSON.parse(h.response.trim()).reviews;
-          } catch (h) {
-            return console.error("Error:", h), null;
-          }
-        })(s);
-        if (f) {
-          const u = f.flatMap((h) =>
-            a.to
-              ? {
-                  body: h.reviewComment,
-                  path: a.to,
-                  line: Number(h.lineNumber),
-                }
-              : []
-          );
-          u && t.push(...u);
-        }
-      }
-  return t;
 }
 
-async function q() {
-  const e = await _();
-  let n;
-  const t = JSON.parse(r(process.env.GITHUB_EVENT_PATH ?? "", "utf8"));
-  if (t.action === "opened") n = await $(e.o, e.r, e.p);
-  else if (t.action === "synchronize") {
-    const a = t.before,
-      i = t.after,
-      s = await o.repos.compareCommits({
-        headers: { accept: "application/vnd.github.v3.diff" },
-        owner: e.o,
-        repo: e.r,
-        base: a,
-        head: i,
-      });
-    n = String(s.data);
+async function getAIResponse(prompt: string): Promise<Array<{
+  lineNumber: string;
+  reviewComment: string;
+}> | null> {
+  try {
+    const response = await ollama.generate({
+      model: OLLAMA_MODEL,
+      prompt: prompt,
+    });
+
+    const res = response.response.trim();
+    return JSON.parse(res).reviews;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+}
+
+function createComment(
+  file: File,
+  chunk: Chunk,
+  aiResponses: Array<{
+    lineNumber: string;
+    reviewComment: string;
+  }>
+): Array<{ body: string; path: string; line: number }> {
+  return aiResponses.flatMap((aiResponse) => {
+    if (!file.to) {
+      return [];
+    }
+    return {
+      body: aiResponse.reviewComment,
+      path: file.to,
+      line: Number(aiResponse.lineNumber),
+    };
+  });
+}
+
+async function createReviewComment(
+  owner: string,
+  repo: string,
+  pull_number: number,
+  comments: Array<{ body: string; path: string; line: number }>
+): Promise<void> {
+  await octokit.pulls.createReview({
+    owner,
+    repo,
+    pull_number,
+    comments,
+    event: "COMMENT",
+  });
+}
+
+async function main() {
+  const prDetails = await getPRDetails();
+  let diff: string | null;
+  const eventData = JSON.parse(
+    readFileSync(process.env.GITHUB_EVENT_PATH ?? "", "utf8")
+  );
+
+  if (eventData.action === "opened") {
+    diff = await getDiff(
+      prDetails.owner,
+      prDetails.repo,
+      prDetails.pull_number
+    );
+  } else if (eventData.action === "synchronize") {
+    const newBaseSha = eventData.before;
+    const newHeadSha = eventData.after;
+
+    const response = await octokit.repos.compareCommits({
+      headers: {
+        accept: "application/vnd.github.v3.diff",
+      },
+      owner: prDetails.owner,
+      repo: prDetails.repo,
+      base: newBaseSha,
+      head: newHeadSha,
+    });
+
+    diff = String(response.data);
   } else {
     console.log("Unsupported event:", process.env.GITHUB_EVENT_NAME);
     return;
   }
-  if (!n) {
+
+  if (!diff) {
     console.log("No diff found");
     return;
   }
-  const a = p(n),
-    i = c
-      .getInput("exclude")
-      .split(",")
-      .map((s) => s.trim()),
-    f = a.filter((s) => !i.some((u) => m(s.to ?? "", u))),
-    u = await A(f, e);
-  u.length > 0 &&
-    (await o.pulls.createReview({
-      owner: e.o,
-      repo: e.r,
-      pull_number: e.p,
-      comments: u,
-      event: "COMMENT",
-    }));
+
+  const parsedDiff = parseDiff(diff);
+
+  const excludePatterns = core
+    .getInput("exclude")
+    .split(",")
+    .map((s) => s.trim());
+
+  const filteredDiff = parsedDiff.filter((file) => {
+    return !excludePatterns.some((pattern) =>
+      minimatch(file.to ?? "", pattern)
+    );
+  });
+
+  const comments = await analyzeCode(filteredDiff, prDetails);
+  if (comments.length > 0) {
+    await createReviewComment(
+      prDetails.owner,
+      prDetails.repo,
+      prDetails.pull_number,
+      comments
+    );
+  }
 }
 
-q().catch((e) => {
-  console.error("Error:", e), process.exit(1);
+main().catch((error) => {
+  console.error("Error:", error);
+  process.exit(1);
 });
