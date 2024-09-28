@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Ollama Code Review
-        uses: ./.github/actions/ollama-review
+        uses: ./.github/actions/ollama_review
         with:
           llm-model: "llama3.2" # 또는 다른 사용 가능한 Ollama 모델
         env:
