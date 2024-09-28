@@ -45,10 +45,10 @@ runs:
           $pr_description
 
           ### 변경된 파일:
-          $file
+          $(cat $file)
           "
 
-          review=$(curl -s http://127.0.0.1:11434/api/generate -d "{\"model\": \"${{ inputs.llm-model }}\", \"prompt\": \"$prompt\", \"stream\": false}" | jq -r '.response')
+          review=$(curl -s localhost:11434/api/generate -d "{\"model\": \"${{ inputs.llm-model }}\", \"prompt\": \"$prompt\", \"stream\": false}" | jq -r '.response')
           echo "$review"
 
           echo "$review" | while IFS= read -r line; do
