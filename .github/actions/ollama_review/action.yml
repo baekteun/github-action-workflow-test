@@ -45,7 +45,7 @@ runs:
           "$pr_description"
 
           ### 변경된 파일:
-          $(cat "$file")
+          "$file"
           _EOF_
           )
 
