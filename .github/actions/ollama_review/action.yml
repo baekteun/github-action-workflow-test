@@ -32,21 +32,21 @@ runs:
           local pr_title="$2"
           local pr_description="$3"
           
-          prompt=$(cat << EOF
-          이 Pull Request 변경사항을 리뷰해줘. 각 코멘트는 새로운 줄에 "라인 X: 코멘트 내용" 형식으로 작성해 줘. X는 해당 라인 번호야.
+          prompt="
+          이 Pull Request 변경사항을 리뷰해줘. 각 코멘트는 새로운 줄에 '라인 X: 코멘트 내용' 형식으로 작성해 줘. X는 해당 라인 번호야.
 
           ### 리뷰 언어:
           한국어
 
           ### 제목:
-          "$pr_title"
+          $pr_title
 
           ### 내용:
-          "$pr_description"
+          $pr_description
 
           ### 변경된 파일:
-          "$file"
-          EOF)
+          $file
+          "
 
           review=$(curl -s http://127.0.0.1:11434/api/generate -d "{\"model\": \"${{ inputs.llm-model }}\", \"prompt\": \"$prompt\", \"stream\": false}" | jq -r '.response')
           
