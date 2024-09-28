@@ -57,7 +57,7 @@ runs:
           test=$(curl -s localhost:11434)
           echo "$test"
 
-          review=$(curl -s localhost:11434/api/generate -d "{\"model\": \"${{ inputs.llm-model }}\", \"prompt\": \"$prompt\", \"stream\": false}" | jq '.response')
+          review=$(curl -s localhost:11434/api/generate -d "{\"model\": \"${{ inputs.llm-model }}\", \"prompt\": \"$prompt\"}")
           echo "$review"
 
           echo "$review" | while IFS= read -r line; do
