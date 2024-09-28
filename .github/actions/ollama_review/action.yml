@@ -45,9 +45,8 @@ runs:
           "$pr_description"
 
           ### 변경된 파일:
-          $(cat "$file")
-          EOF
-          )
+          "$file"
+          EOF)
 
           review=$(curl -s http://127.0.0.1:11434/api/generate -d "{\"model\": \"${{ inputs.llm-model }}\", \"prompt\": \"$prompt\", \"stream\": false}" | jq -r '.response')
           
