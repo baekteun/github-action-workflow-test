@@ -39,10 +39,10 @@ runs:
           한국어
 
           ### 제목:
-          $pr_title
+          "$pr_title"
 
           ### 내용:
-          $pr_description
+          "$pr_description"
 
           ### 변경된 파일:
           $(cat "$file")
