@@ -8,6 +8,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: "Setup jq"
+      uses: dcarbone/install-jq-action@v2
+      with:
+        version: "1.7"
+        force: "false"
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
@@ -47,6 +53,9 @@ runs:
           ### 변경된 파일:
           $(cat $file)
           "
+
+          test=$(curl -s localhost:11434)
+          echo test
 
           review=$(curl -s localhost:11434/api/generate -d "{\"model\": \"${{ inputs.llm-model }}\", \"prompt\": \"$prompt\", \"stream\": false}" | jq -r '.response')
           echo "$review"
