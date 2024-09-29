@@ -1,9 +1,0 @@
-﻿{
-  "agentId": 21,
-  "agentName": "baekteun",
-  "poolId": 1,
-  "poolName": "Default",
-  "serverUrl": "https://pipelinesghubeus24.actions.githubusercontent.com/kEgO8tbNbR6kXOPrKPy55cMlqgsM0x5Gw7ENmiO76sAWeRuLKO/",
-  "gitHubUrl": "https://github.com/baekteun/github-action-workflow-test",
-  "workFolder": "_work"
-}
