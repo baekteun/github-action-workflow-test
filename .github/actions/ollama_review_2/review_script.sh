@@ -41,7 +41,7 @@ EOF
     fi
   done
 }
-}
+
 
 for file in ${{ steps.get-modified-files.outputs.all_changed_files }}; do
   pr_title="${{ github.event.pull_request.title }}"
