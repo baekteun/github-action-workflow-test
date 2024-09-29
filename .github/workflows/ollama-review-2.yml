@@ -1,0 +1,19 @@
+name: Ollama Code Review 2
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Ollama Code Review
+        uses: ./.github/actions/ollama_review_2
+        with:
+          llm-model: "llama3.2"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
