@@ -20,7 +20,8 @@ $(cat "$file")
 EOF
 )
 
-  review=$(curl -s http://127.0.0.1:11434/api/generate -d "{\"model\": \"$LLM_MODEL\", \"prompt\": \"$prompt\", \"stream\": false}")
+  echo "$prompt"
+  review=$(curl -s http://127.0.0.1:11434/api/generate -d "{\"model\": \"$LLM_MODEL\", \"prompt\": \"$prompt\", \"stream\": false}" | jq -r '.response')
   echo "$review"
 
   echo "$review" | while IFS= read -r line; do
