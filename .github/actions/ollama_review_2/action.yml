@@ -33,6 +33,12 @@ runs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
         LLM_MODEL: ${{ inputs.llm-model }}
+        CHANGED_FILES: ${{ steps.get-modified-files.outputs.all_changed_files }}
+        PR_TITLE: ${{ github.event.pull_request.title }}
+        PR_DESCRIPTION: ${{ github.event.pull_request.body }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
       run: |
         bash ${{ github.action_path }}/review_script.sh
       shell: bash
