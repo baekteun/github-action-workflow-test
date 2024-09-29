@@ -32,12 +32,7 @@ runs:
     - name: Review modified files
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        LLM_MODEL: ${{ inputs.llm-model }}
       run: |
-        for file in ${{ steps.get-modified-files.outputs.all_changed_files }}; do
-          modified_file_review=$(curl -s http://127.0.0.1:11434/api/generate -d '{"model": "${{ inputs.llm-model }}", "prompt": "Review the pull request = PR Title: ${{ github.event.pull_request.title }}\n\ PR Body: ${{ github.event.pull_request.body }}\n\ File:\n\n```\n$(cat $file)\n```", "stream": false}' | jq -r '.response')
-          file_comment="Code Review for \`$file\`:\n\n$modified_file_review"
-          echo "$file_comment" >> ollama_review.txt
-        done
-
-        gh pr comment ${{ github.event.pull_request.number }} --body "$(cat ollama_review.txt)"
+        bash ${{ github.action_path }}/review_script.sh
       shell: bash
