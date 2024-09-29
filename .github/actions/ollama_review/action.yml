@@ -54,7 +54,7 @@ runs:
           $(cat $file)
           "
 
-          replaced_prompt = $(echo "$prompt" | sed 's/\\n/\n/')
+          local replaced_prompt = $(echo "$prompt" | sed 's/\\n/\n/')
           review=$(curl -s localhost:11434/api/generate -d "{\"model\": \"${{ inputs.llm-model }}\", \"prompt\": \"$replaced_prompt\"}")
           echo "$review"
 
