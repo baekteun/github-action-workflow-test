@@ -33,7 +33,6 @@ EOF
         -H "Accept: application/vnd.github.v3+json" \
         /repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/comments \
         -f body="$comment" \
-        -f commit_id="$COMMIT_SHA" \
         -f path="$file" \
         -f line="$line_number"
     fi
