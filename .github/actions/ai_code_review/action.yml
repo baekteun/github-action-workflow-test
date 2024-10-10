@@ -1,0 +1,116 @@
+name: "AI Code Reviewer"
+description: "Automated code review using AI powered by Ollama"
+
+inputs:
+  github_token:
+    description: "GitHub token"
+    required: true
+    default: ${{ github.token }}
+
+  debug:
+    description: "Enable debug mode"
+    required: false
+    default: "false"
+
+  disable_review:
+    description: "Disable code review"
+    required: false
+    default: "false"
+
+  disable_release_notes:
+    description: "Disable release notes generation"
+    required: false
+    default: "false"
+
+  max_files:
+    description: "Maximum number of files to review"
+    required: false
+    default: "0"
+
+  review_simple_changes:
+    description: "Review simple changes"
+    required: false
+    default: "true"
+
+  review_comment_lgtm:
+    description: "Leave LGTM comments"
+    required: false
+    default: "false"
+
+  path_filters:
+    description: "Paths to include in the review"
+    required: false
+    default: ""
+
+  system_message:
+    description: "System message for the AI"
+    required: false
+    default: ""
+
+  ollama_light_model:
+    description: "Ollama model for light tasks"
+    required: false
+    default: "llama3.2"
+
+  ollama_heavy_model:
+    description: "Ollama model for heavy tasks"
+    required: false
+    default: "llama3.2"
+
+  ollama_model_temperature:
+    description: "Temperature for Ollama model"
+    required: false
+    default: "0.1"
+
+  ollama_retries:
+    description: "Number of retries for Ollama API calls"
+    required: false
+    default: "3"
+
+  ollama_timeout_ms:
+    description: "Timeout for Ollama API calls in milliseconds"
+    required: false
+    default: "60000"
+
+  ollama_concurrency_limit:
+    description: "Concurrency limit for Ollama API calls"
+    required: false
+    default: "5"
+
+  github_concurrency_limit:
+    description: "Concurrency limit for GitHub API calls"
+    required: false
+    default: "5"
+
+  ollama_base_url:
+    description: "Base URL for Ollama API"
+    required: false
+    default: "http://localhost:11434"
+
+  language:
+    description: "Language for AI responses"
+    required: false
+    default: "en"
+
+  summarize:
+    description: "Custom summarization prompt"
+    required: false
+    default: ""
+
+  summarize_release_notes:
+    description: "Custom release notes summarization prompt"
+    required: false
+    default: ""
+
+  bot_icon:
+    description: "Icon for the bot comments"
+    required: false
+    default: "🤖"
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
+
+branding:
+  icon: "code"
+  color: "blue"
