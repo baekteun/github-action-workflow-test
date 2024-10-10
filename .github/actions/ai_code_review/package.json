@@ -18,10 +18,9 @@
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
     "ollama": "^0.5.9",
-    "p-limit": "^6.1.0"
+    "p-limit": "3.1.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.0",
     "@types/node": "^18.15.11",
     "typescript": "^5.0.3"
   }
