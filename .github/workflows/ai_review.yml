@@ -45,6 +45,7 @@ jobs:
         uses: ./.github/actions/ai_code_review
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          debug: "true"
           ollama_light_model: "llama3.2"
           ollama_heavy_model: "llama3.2"
           language: "ko"
