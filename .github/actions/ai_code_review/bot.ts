@@ -38,6 +38,7 @@ export class Bot {
 
         return [content, tokenCount];
       } catch (error: any) {
+        warning(`Ollama API error: ${error}`);
         warning(`Ollama API error: ${error.message}`);
         retries--;
         if (retries < 0) {
