@@ -30,7 +30,7 @@ Analyze the changes in GIT_DIFF in your mind.
 
 If the changes look good, respond "LGTM :rocket:". If you have any concerns, provide a brief description of the concerns.
 
-- All the Kotlin files are compiled and type-checked by the Kotlin compiler. Do not report issues that the Kotlin compiler would find.
+- All the Swift files are compiled and type-checked by the Swift compiler. Do not report issues that the Kotlin compiler would find.
 - only report functional issues
 - Use emojis
 - If available, suggest code fixes and improvements using a diff format.
